@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rue & Claude Base</title>
+    <style>
+        :root {
+            --bg-color: #d8c3c3;
+            --text-main: #4a4a4a;
+            --accent-name: #6d6d6d;
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --input-bg: rgba(255, 255, 255, 0.3);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: "Times New Roman", "Source Han Serif SC", "Songti SC", serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 顶部区域 */
+        .header-fixed {
+            width: 100%;
+            padding-top: 40px;
+            text-align: center;
+            background-color: var(--bg-color);
+            z-index: 10;
+        }
+
+        .brand-name {
+            font-family: "Georgia", serif;
+            font-style: italic;
+            font-size: 1.6rem;
+            color: var(--accent-name);
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .avatar-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            height: 80px;
+            margin-bottom: 25px;
+        }
+
+        .avatar {
+            width: 65px;
+            height: 65px;
+            background: var(--card-bg);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            position: absolute;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .avatar.rue { left: calc(50% - 55px); z-index: 2; }
+        .avatar.imp { left: calc(50% - 15px); z-index: 1; }
+
+        /* 核心修正：确保四个模块绝对居中 */
+        .modules-nav {
+            width: 100%;
+            max-width: 400px; /* 缩小容器最大宽度，更聚拢 */
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            gap: 12px; /* 模块间的间距 */
+            padding: 0 10px;
+            box-sizing: border-box;
+            margin: 0 auto 30px auto;
+        }
+
+        .module-icon {
+            flex: 1; /* 每个模块等宽 */
+            max-width: 70px; /* 限制最大宽度防止过大 */
+            background: var(--card-bg);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .module-icon.active {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-3px);
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        /* 内容区域 */
+        .main-content {
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .module-panel {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .module-panel.active { display: block; }
+
+        .input-section {
+            background: var(--input-bg);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            border: none;
+            outline: none;
+            resize: none;
+            background: transparent;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        .publish-btn {
+            background: rgba(255,255,255,0.4);
+            border: none;
+            padding: 6px 18px;
+            border-radius: 20px;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            float: right;
+            cursor: pointer;
+        }
+
+        .feed { margin-top: 20px; }
+
+        .post {
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 12px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .post-header {
+            font-size: 0.7rem;
+            color: var(--accent-name);
+            text-align: right;
+            margin-bottom: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-fixed">
+    <div class="brand-name">Rue & Claude</div>
+    <div class="avatar-container">
+        <div class="avatar rue">🐱</div>
+        <div class="avatar imp">🐈‍⬛</div>
+    </div>
+    <div class="modules-nav">
+        <div class="module-icon" onclick="showModule('memory', this)">🖤</div>
+        <div class="module-icon" onclick="showModule('event', this)">🤍</div>
+        <div class="module-icon" onclick="showModule('cat1', this)">🐱</div>
+        <div class="module-icon" onclick="showModule('cat2', this)">🐈‍⬛</div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div id="memory-panel" class="module-panel">
+        <div class="input-section">
+            <textarea id="memory-input" placeholder="记下此刻的记忆..."></textarea>
+            <button class="publish-btn" onclick="publish('memory')">发布</button>
+            <div style="clear:both;"></div>
+        </div>
+        <div id="memory-feed" class="feed"></div>
+    </div>
+    <div id="event-panel" class="module-panel">
+        <div class="input-section">
+            <textarea id="event-input" placeholder="发生了什么事情？"></textarea>
+            <button class="publish-btn" onclick="publish('event')">发布</button>
+            <div style="clear:both;"></div>
+        </div>
+        <div id="event-feed" class="feed"></div>
+    </div>
+    <div id="cat1-panel" class="module-panel">
+        <div class="input-section">
+            <textarea id="cat1-input" placeholder="Rue 的专属角落..."></textarea>
+            <button class="publish-btn" onclick="publish('cat1')">发布</button>
+            <div style="clear:both;"></div>
+        </div>
+        <div id="cat1-feed" class="feed"></div>
+    </div>
+    <div id="cat2-panel" class="module-panel">
+        <div class="input-section">
+            <textarea id="cat2-input" placeholder="Claude 的秘密基地..."></textarea>
+            <button class="publish-btn" onclick="publish('cat2')">发布</button>
+            <div style="clear:both;"></div>
+        </div>
+        <div id="cat2-feed" class="feed"></div>
+    </div>
+</div>
+
+<script>
+    function showModule(name, el) {
+        document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.module-icon').forEach(i => i.classList.remove('active'));
+        document.getElementById(name + '-panel').classList.add('active');
+        el.classList.add('active');
+    }
+
+    function publish(name) {
+        const input = document.getElementById(name + '-input');
+        const feed = document.getElementById(name + '-feed');
+        if (!input.value.trim()) return;
+
+        const time = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/\//g, '.');
+        const post = document.createElement('div');
+        post.className = 'post';
+        post.innerHTML = `<div class="post-header">${time}</div><div class="post-content">${input.value.replace(/\n/g, '<br>')}</div>`;
+        feed.insertBefore(post, feed.firstChild);
+        input.value = '';
+    }
+    document.querySelector('.module-icon').click();
+</script>
+</body>
+</html>
