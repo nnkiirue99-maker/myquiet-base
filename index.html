@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rue & Claude Base</title>
+    <style>
+        :root { --bg: #f4f4f4; --card: #ffffff; --accent: #d8b4bc; --text: #4a4a4a; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; display: flex; justify: center; padding: 20px; margin: 0; }
+        .container { width: 100%; max-width: 500px; background: var(--card); padding: 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        h1 { font-size: 24px; font-weight: 300; margin-bottom: 30px; text-align: center; color: var(--accent); }
+        .module-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        button { border: 1.5px solid var(--accent); background: transparent; color: var(--accent); padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        button.active { background: var(--accent); color: white; }
+        textarea { width: 100%; height: 120px; border: 1px solid #eee; border-radius: 15px; padding: 15px; box-sizing: border-box; resize: none; outline: none; margin-bottom: 20px; }
+        .send-btn { width: 100%; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 50px; font-size: 16px; box-shadow: 0 4px 15px rgba(216,180,188,0.4); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rue & Claude Base</h1>
+        <div class="module-group">
+            <button onclick="selectModule('memory', this)">Memory</button>
+            <button onclick="selectModule('event', this)">Event</button>
+            <button onclick="selectModule('cat1', this)">Rue</button>
+            <button onclick="selectModule('cat2', this)">Claude</button>
+        </div>
+        <textarea id="content" placeholder="在这里输入内容..."></textarea>
+        <button class="send-btn" onclick="sendToNotion()">同步到 Notion</button>
+    </div>
+
+    <script>
+        let currentModule = '';
+        function selectModule(name, btn) {
+            currentModule = name;
+            document.querySelectorAll('.module-group button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        async function sendToNotion() {
+            const content = document.getElementById('content').value;
+            if (!currentModule || !content) return alert('选个模块写点什么吧');
+            const res = await fetch('/api/publish', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ moduleName: currentModule, content: content })
+            });
+            if (res.ok) {
+                alert('已同步到沙滩');
+                document.getElementById('content').value = '';
+            } else {
+                alert('出错了，检查下设置');
+            }
+        }
+    </script>
+</body>
+</html>
