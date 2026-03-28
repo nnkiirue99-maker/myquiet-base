@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rue & Claude Base</title>
+    <style>
+        :root {
+            --bg-color: #d8c3c3;
+            --text-main: #4a4a4a;
+            --accent-name: #6d6d6d;
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --input-bg: rgba(255, 255, 255, 0.3);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: "Times New Roman", "Source Han Serif SC", "Songti SC", serif;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+
+        .header-fixed { width: 100%; padding-top: 40px; text-align: center; background-color: var(--bg-color); z-index: 10; }
+        .brand-name { font-family: "Georgia", serif; font-style: italic; font-size: 1.6rem; color: var(--accent-name); letter-spacing: 2px; margin-bottom: 15px; }
+        
+        .avatar-container { position: relative; display: flex; justify-content: center; height: 80px; margin-bottom: 25px; }
+        .avatar { width: 65px; height: 65px; background: var(--card-bg); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.2rem; position: absolute; border: 2px solid rgba(255,255,255,0.3); }
+        .avatar.rue { left: calc(50% - 55px); z-index: 2; }
+        .avatar.imp { left: calc(50% - 15px); z-index: 1; }
+
+        .modules-nav { width: 100%; max-width: 400px; display: flex; justify-content: center; gap: 12px; margin: 0 auto 30px auto; padding: 0 10px; box-sizing: border-box; }
+        .module-icon { flex: 1; max-width: 70px; background: var(--card-bg); backdrop-filter: blur(5px); border-radius: 12px; height: 70px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
+        .module-icon.active { background: rgba(255, 255, 255, 0.4); transform: translateY(-3px); border: 1px solid rgba(255,255,255,0.4); }
+
+        .main-content { width: 90%; max-width: 500px; }
+        .input-section { background: var(--input-bg); border-radius: 15px; padding: 15px; margin-bottom: 20px; }
+        textarea { width: 100%; height: 80px; border: none; outline: none; resize: none; background: transparent; color: var(--text-main); font-family: inherit; font-size: 0.95rem; }
+        
+        .input-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .publish-btn { background: rgba(255,255,255,0.4); border: none; padding: 6px 22px; border-radius: 20px; color: var(--text-main); font-size: 0.85rem; cursor: pointer; }
+
+        .feed { margin-top: 20px; padding-bottom: 40px; }
+        .post { background: rgba(255, 255, 255, 0.1); margin-bottom: 12px; padding: 15px; border-radius: 12px; animation: fadeIn 0.4s ease; }
+        .post-header { font-size: 0.7rem; color: var(--accent-name); text-align: right; margin-bottom: 8px; opacity: 0.7; }
+        .post-content { line-height: 1.6; word-break: break-all; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="header-fixed">
+    <div class="brand-name">Rue & Claude</div>
+    <div class="avatar-container">
+        <div class="avatar rue">🐱</div>
+        <div class="avatar imp">🐈‍⬛</div>
+    </div>
+    <div class="modules-nav">
+        <div class="module-icon" id="btn-MEMORY" onclick="showModule('MEMORY')">🖤</div>
+        <div class="module-icon" id="btn-EVENT" onclick="showModule('EVENT')">🤍</div>
+        <div class="module-icon" id="btn-CAT1" onclick="showModule('CAT1')">🐱</div>
+        <div class="module-icon" id="btn-CAT2" onclick="showModule('CAT2')">🐈‍⬛</div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="input-section">
+        <textarea id="main-input" placeholder="记下此刻..."></textarea>
+        <div class="input-footer">
+            <span></span>
+            <button id="pub-btn" class="publish-btn" onclick="publish()">发布</button>
+        </div>
+    </div>
+    <div id="feed" class="feed"></div>
+</div>
+
+<script>
+    let currentType = 'MEMORY';
+
+    async function showModule(type) {
+        currentType = type;
+        document.querySelectorAll('.module-icon').forEach(i => i.classList.remove('active'));
+        document.getElementById('btn-' + type).classList.add('active');
+        loadData();
+    }
+
+    async function loadData() {
+        const feed = document.getElementById('feed');
+        feed.innerHTML = '<div style="text-align:center; opacity:0.5;">读取记忆中...</div>';
+        try {
+            // 后端 publish.js 里的查询逻辑已经包含了排序，这里直接展示前 50 条
+            const res = await fetch(`/api/publish?type=${currentType}`);
+            const data = await res.json();
+            
+            if (!data || data.length === 0) {
+                feed.innerHTML = '<div style="text-align:center; opacity:0.3; margin-top:20px;">这里还没有留存过记忆</div>';
+                return;
+            }
+
+            // 只显示前 50 条历史消息
+            const recentData = data.slice(0, 50);
+
+            feed.innerHTML = recentData.map(post => `
+                <div class="post">
+                    <div class="post-header">${post.date}</div>
+                    <div class="post-content">${post.content.replace(/\n/g, '<br>')}</div>
+                </div>
+            `).join('');
+        } catch (e) {
+            feed.innerHTML = '<div style="text-align:center; color:rgba(255,0,0,0.4);">连接 Notion 失败，请检查配置</div>';
+        }
+    }
+
+    async function publish() {
+        const input = document.getElementById('main-input');
+        const btn = document.getElementById('pub-btn');
+        const content = input.value.trim();
+        if (!content || btn.innerText === '发布中...') return;
+
+        btn.innerText = '发布中...';
+        try {
+            const res = await fetch('/api/publish', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: currentType, content: content })
+            });
+            if (res.ok) {
+                input.value = '';
+                await loadData();
+            } else {
+                alert('Notion 拒绝了发布请求');
+            }
+        } catch (e) {
+            alert('发布失败，请检查网络');
+        } finally {
+            btn.innerText = '发布';
+        }
+    }
+
+    // 初始化
+    window.onload = () => showModule('MEMORY');
+</script>
+</body>
+</html>
