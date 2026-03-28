@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rue & Claude Base</title>
+    <style>
+        :root {
+            --bg-color: #d8c3c3;
+            --text-main: #4a4a4a;
+            --accent-name: #6d6d6d;
+            --card-bg: rgba(255, 255, 255, 0.15);
+            --input-bg: rgba(255, 255, 255, 0.3);
+            --accent-color: #7C7369;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: "Times New Roman", "Source Han Serif SC", "Songti SC", serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header-fixed {
+            width: 100%;
+            padding-top: 40px;
+            text-align: center;
+            background-color: var(--bg-color);
+            z-index: 10;
+        }
+
+        .brand-name {
+            font-family: "Georgia", serif;
+            font-style: italic;
+            font-size: 1.6rem;
+            color: var(--accent-name);
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .avatar-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            height: 80px;
+            margin-bottom: 25px;
+        }
+
+        .avatar {
+            width: 65px;
+            height: 65px;
+            background: var(--card-bg);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            position: absolute;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .avatar.rue { left: calc(50% - 55px); z-index: 2; }
+        .avatar.imp { left: calc(50% - 15px); z-index: 1; }
+
+        .modules-nav {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 0 10px;
+            box-sizing: border-box;
+            margin: 0 auto 30px auto;
+        }
+
+        .module-icon {
+            flex: 1;
+            max-width: 70px;
+            background: var(--card-bg);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .module-icon.active {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-3px);
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .main-content {
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .module-panel {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .module-panel.active { display: block; }
+
+        .input-section {
+            background: var(--input-bg);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            border: none;
+            outline: none;
+            resize: none;
+            background: transparent;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+        }
+
+        /* 按钮栏样式 */
+        .input-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .upload-label {
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--accent-name);
+            background: rgba(255,255,255,0.2);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+        }
+
+        .publish-btn {
+            background: rgba(255,255,255,0.4);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .publish-btn:disabled { opacity: 0.5; }
+
+        .feed { margin-top: 20px; }
+
+        .post {
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 12px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .post-header {
+            font-size: 0.7rem;
+            color: var(--accent-name);
+            text-align: right;
+            margin-bottom: 5px;
+        }
+
+        /* 图片显示样式 */
+        .post-content img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-fixed">
+    <div class="brand-name">Rue & Claude</div>
+    <div class="avatar-container">
+        <div class="avatar rue">🐱</div>
+        <div class="avatar imp">🐈‍⬛</div>
+    </div>
+    <div class="modules-nav">
+        <div class="module-icon" onclick="showModule('memory', this)">🖤</div>
+        <div class="module-icon" onclick="showModule('event', this)">🤍</div>
+        <div class="module-icon" onclick="showModule('cat1', this)">🐱</div>
+        <div class="module-icon" onclick="showModule('cat2', this)">🐈‍⬛</div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div id="memory-panel" class="module-panel">
+        <div class="input-section">
+            <textarea id="memory-input" placeholder="记下此刻的记忆..."></textarea>
+            <div class="input-footer">
+                <label class="upload-label">＋<input type="file" hidden accept="image/*" onchange="autoUpload(this, 'memory')"></label>
+                <button class="publish-btn" onclick="publish('memory')">发布</button>
+            </div>
+        </div>
+        <div id="memory-feed" class="feed"></div>
+    </div>
+
+    <div id="event-panel" class="module-panel">
+        <div class="input-section">
+            <textarea id="event-input" placeholder="发生了什么事情？"></textarea>
+            <div class="input-footer">
+                <label class="upload-label">＋<input type="file" hidden accept="image/*" onchange="autoUpload(this, 'event')"></label>
+                <button class="publish-btn" onclick="publish('event')">发布</button>
+            </div>
+        </div>
+        <div id="event-feed" class="feed"></div>
+    </div>
+
+    <div id="cat1-panel" class="module-panel">
+        <div class="input-section">
+            <textarea id="cat1-input" placeholder="Rue 的专属角落..."></textarea>
+            <div class="input-footer">
+                <label class="upload-label">＋<input type="file" hidden accept="image/*" onchange="autoUpload(this, 'cat1')"></label>
+                <button class="publish-btn" onclick="publish('cat1')">发布</button>
+            </div>
+        </div>
+        <div id="cat1-feed" class="feed"></div>
+    </div>
+
+    <div id="cat2-panel" class="module-panel">
+        <div class="input-section">
+            <textarea id="cat2-input" placeholder="Claude 的秘密基地..."></textarea>
+            <div class="input-footer">
+                <label class="upload-label">＋<input type="file" hidden accept="image/*" onchange="autoUpload(this, 'cat2')"></label>
+                <button class="publish-btn" onclick="publish('cat2')">发布</button>
+            </div>
+        </div>
+        <div id="cat2-feed" class="feed"></div>
+    </div>
+</div>
+
+<script>
+    // --- 核心配置 ---
+    const GITHUB_TOKEN = 'ghp_FU03oRtswL3NtERmn7dYzMUxasp7DV0AAFWT'; 
+    const GITHUB_REPO = 'nnkiirue99-maker/myquiet-base';
+    const API_URL = '/api/publish';
+
+    function showModule(name, el) {
+        document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.module-icon').forEach(i => i.classList.remove('active'));
+        document.getElementById(name + '-panel').classList.add('active');
+        el.classList.add('active');
+        loadData(name);
+    }
+
+    // 自动上传图片逻辑
+    async function autoUpload(input, name) {
+        if (!input.files[0]) return;
+        const file = input.files[0];
+        const textArea = document.getElementById(name + '-input');
+        const originalBtnText = textArea.nextElementSibling.querySelector('.publish-btn').innerText;
+        const pubBtn = textArea.nextElementSibling.querySelector('.publish-btn');
+        
+        pubBtn.innerText = '上传中...';
+        pubBtn.disabled = true;
+
+        const fileName = `assets/${Date.now()}-${file.name}`;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64 = e.target.result.split(',')[1];
+            try {
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${fileName}`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'upload photo', content: base64 })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    textArea.value = data.content.download_url;
+                    pubBtn.innerText = '已就绪';
+                } else { alert('图片上传失败'); pubBtn.innerText = '重试'; }
+            } catch (err) { alert('网络错误'); }
+            pubBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async function publish(name) {
+        const input = document.getElementById(name + '-input');
+        if (!input.value.trim()) return;
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: name.toUpperCase(), content: input.value.trim() })
+            });
+            if (res.ok) {
+                input.value = '';
+                loadData(name);
+            }
+        } catch (e) { alert('发布失败'); }
+    }
+
+    async function loadData(name) {
+        const feed = document.getElementById(name + '-feed');
+        feed.innerHTML = '<div style="text-align:center;font-size:0.8rem;opacity:0.5;">读取中...</div>';
+        try {
+            const res = await fetch(`${API_URL}?type=${name.toUpperCase()}`);
+            const data = await res.json();
+            feed.innerHTML = data.map(n => {
+                const isImg = n.content.match(/\.(jpeg|jpg|gif|png|webp|svg)/i) || n.content.includes('raw.githubusercontent');
+                return `
+                    <div class="post">
+                        <div class="post-header">${n.date}</div>
+                        <div class="post-content">
+                            ${isImg ? `<img src="${n.content}" loading="lazy">` : n.content.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (e) { feed.innerHTML = ''; }
+    }
+
+    // 初始化显示第一个模块
+    document.querySelector('.module-icon').click();
+</script>
+</body>
+</html>
